@@ -1,0 +1,17 @@
+{
+  "watch": ["src/**/*"],
+  "ext": "ts,tsx,js,jsx,json,svg,css",
+  "ignore": [
+    "node_modules",
+    ".expo",
+    "dist",
+    "web-build",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ],
+  "exec": "EXPO_DEBUG=true expo start --web --clear --no-dev --minify=false",
+  "delay": "500",
+  "verbose": true,
+  "legacyWatch": false,
+  "polling": false
+}

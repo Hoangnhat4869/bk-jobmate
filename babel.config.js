@@ -11,6 +11,26 @@ module.exports = function (api) {
           },
         },
       ],
+      [
+        "module:react-native-dotenv",
+        {
+          moduleName: "@env",
+          path: ".env",
+          blacklist: null,
+          whitelist: null,
+          safe: false,
+          allowUndefined: true,
+        },
+      ],
+      // Plugin cho Fast Refresh
+      "react-refresh/babel",
     ],
+    // Cấu hình để tăng tốc độ biên dịch
+    compact: true,
+    // Bỏ qua kiểm tra kiểu dữ liệu TypeScript trong quá trình biên dịch
+    assumptions: {
+      setPublicClassFields: true,
+      privateFieldsAsProperties: true,
+    },
   };
 };
