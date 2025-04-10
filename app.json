@@ -14,16 +14,20 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/1d40eac5-ba40-488d-8449-cc7158f32f1c"
+      "url": "https://u.expo.dev/1d40eac5-ba40-488d-8449-cc7158f32f1c",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.bkjobmate.app"
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/logo.png",
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.bkjobmate.app",
@@ -38,18 +42,10 @@
               "host": "*.bkjobmate.app"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
-        },
-        {
-          "action": "VIEW",
-          "autoVerify": true,
-          "data": [
-            {
-              "scheme": "https",
-              "host": "*.bkjobmate.app"
-            }
-          ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -62,7 +58,10 @@
         "hmr": true
       }
     },
-    "plugins": [],
+    "plugins": [
+      "expo-localization",
+      "expo-secure-store"
+    ],
     "extra": {
       "eas": {
         "projectId": "1d40eac5-ba40-488d-8449-cc7158f32f1c"
