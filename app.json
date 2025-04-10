@@ -14,7 +14,7 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/82716b8e-2818-4161-8a88-c571df4369a5"
+      "url": "https://u.expo.dev/1d40eac5-ba40-488d-8449-cc7158f32f1c"
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
@@ -29,6 +29,17 @@
       "package": "com.bkjobmate.app",
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "*.bkjobmate.app"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
         {
           "action": "VIEW",
           "autoVerify": true,
@@ -63,6 +74,9 @@
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
-    "owner": "hoangnhat4869"
+    "owner": "hoangnhat4869",
+    "developmentClient": {
+      "silentLaunch": true
+    }
   }
 }
