@@ -53,12 +53,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     androidClientId: process.env.ANDROID_CLIENT_ID,
     iosClientId: process.env.IOS_CLIENT_ID,
     webClientId: process.env.WEB_CLIENT_ID,
-    // Make sure to add these client IDs from Google Cloud Console
-    // using the package name: com.bkjobmate.app
-    redirectUri:
-      Platform.OS === "web"
-        ? window.location.origin // Sử dụng origin của trang web hiện tại
-        : undefined, // Expo sẽ tự động xử lý cho mobile
+    redirectUri: Platform.select({
+      web: typeof window !== "undefined" ? window.location.origin : undefined,
+      default: undefined,
+    }),
   });
 
   // Check for stored user on app load
