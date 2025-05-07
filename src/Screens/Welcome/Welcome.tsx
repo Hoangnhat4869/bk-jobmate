@@ -48,7 +48,7 @@ export const Welcome = (props: {
           title="Đăng nhập"
         />
         <Button
-          onPress={() => props.onNavigate(RootScreens.MAIN)}
+          onPress={() => props.onNavigate(RootScreens.ONBOARDING)}
           style={[styles.button, styles.secondaryButton]}
           title="Khám phá ngay"
           variant="outline"

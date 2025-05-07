@@ -18,17 +18,20 @@ This guide will help you set up Google Authentication for the BKJobmate app.
 3. Create client IDs for each platform:
 
 ### Android
+
 - Application type: Android
 - Name: BKJobmate Android
 - Package name: `com.bkjobmate.app`
 - SHA-1 certificate fingerprint: (Generate this from your keystore)
 
 ### iOS
+
 - Application type: iOS
 - Name: BKJobmate iOS
 - Bundle ID: `com.bkjobmate.app`
 
 ### Web
+
 - Application type: Web application
 - Name: BKJobmate Web
 - Authorized JavaScript origins: `https://auth.expo.io`
@@ -41,9 +44,12 @@ Open `src/Context/AuthContext.tsx` and update the following lines with your clie
 ```typescript
 // Initialize Google Auth
 const [_, response, promptAsync] = Google.useAuthRequest({
-  androidClientId: "YOUR_ANDROID_CLIENT_ID", // Replace with your Android client ID
-  iosClientId: "YOUR_IOS_CLIENT_ID", // Replace with your iOS client ID
-  webClientId: "YOUR_WEB_CLIENT_ID", // Replace with your Web client ID
+  androidClientId:
+    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your Android client ID
+  iosClientId:
+    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your iOS client ID
+  webClientId:
+    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your Web client ID
 });
 ```
 

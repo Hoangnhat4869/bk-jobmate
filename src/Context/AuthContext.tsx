@@ -48,16 +48,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
 
   // Initialize Google Auth
-  const [_, response, promptAsync] = Google.useAuthRequest({
-    expoClientId: process.env.EXPO_CLIENT_ID,
-    androidClientId: process.env.ANDROID_CLIENT_ID,
-    iosClientId: process.env.IOS_CLIENT_ID,
-    webClientId: process.env.WEB_CLIENT_ID,
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId:
+      "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com",
+    iosClientId:
+      "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com",
+    webClientId:
+      "916197727859-m5c57q0il4us2l93qij4rnsr9k43hhmh.apps.googleusercontent.com",
     redirectUri: Platform.select({
       web: typeof window !== "undefined" ? window.location.origin : undefined,
       default: undefined,
     }),
   });
+
+  // const [_, response, promptAsync] = Google.useAuthRequest({
+  //   clientId: process.env.EXPO_CLIENT_ID,
+  //   androidClientId: process.env.ANDROID_CLIENT_ID,
+  //   iosClientId: process.env.IOS_CLIENT_ID,
+  //   webClientId: process.env.WEB_CLIENT_ID,
+  //   redirectUri: Platform.select({
+  //     web: typeof window !== "undefined" ? window.location.origin : undefined,
+  //     default: undefined,
+  //   }),
+  // });
 
   // Check for stored user on app load
   useEffect(() => {
