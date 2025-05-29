@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -8,25 +8,40 @@ import {
   Platform,
   ScrollView,
   SafeAreaView,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/Context/AuthContext";
+import { useAuthNavigation } from "@/Hooks";
 import { COLORS } from "@/constants/theme";
 import { RootScreens } from "..";
-import { RootStackParamList } from "@/Navigation";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Input, Button, Typography } from "@/Components";
+import { Input, Button, Typography, ErrorMessage } from "@/Components";
 import { Logo } from "@/assets/svgs";
 
 export const SimpleLogin = () => {
-  const { signIn, signInWithGoogle, isLoading, error } = useAuth();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { signIn, signInWithGoogle, isLoading, error, isAuthenticated } =
+    useAuth();
+  const { navigateToRegister, navigateToMain, handleClearError } =
+    useAuthNavigation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationError, setValidationError] = useState("");
+
+  // Navigate to main when authentication is successful
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigateToMain();
+    }
+  }, [isAuthenticated, navigateToMain]);
+
+  // Clear errors when component unmounts or user starts typing
+  useEffect(() => {
+    if (email || password) {
+      setValidationError("");
+      handleClearError();
+    }
+  }, [email, password, handleClearError]);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,8 +50,7 @@ export const SimpleLogin = () => {
     }
 
     setValidationError("");
-    // await signIn(email, password); // TODO: Call API Login
-    navigation.navigate(RootScreens.MAIN);
+    await signIn(email, password);
   };
 
   const handleGoogleLogin = async () => {
@@ -98,7 +112,10 @@ export const SimpleLogin = () => {
             />
 
             {(validationError || error) && (
-              <Text style={styles.errorText}>{validationError || error}</Text>
+              <ErrorMessage
+                message={validationError || error}
+                onDismiss={handleClearError}
+              />
             )}
 
             <Button
@@ -111,7 +128,9 @@ export const SimpleLogin = () => {
 
             <View style={styles.forgotPasswordContainer}>
               <TouchableOpacity
-                onPress={() => navigation.navigate(RootScreens.FORGOT_PASSWORD)}
+                onPress={() => {
+                  /* TODO: Navigate to forgot password */
+                }}
               >
                 <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
               </TouchableOpacity>
@@ -119,9 +138,7 @@ export const SimpleLogin = () => {
 
             <View style={styles.registerContainer}>
               <Text style={styles.registerText}>Chưa có tài khoản? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate(RootScreens.REGISTER)}
-              >
+              <TouchableOpacity onPress={navigateToRegister}>
                 <Text style={styles.registerLink}>Đăng ký ngay</Text>
               </TouchableOpacity>
             </View>

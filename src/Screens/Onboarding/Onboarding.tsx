@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   StyleSheet,
@@ -7,24 +7,25 @@ import {
   Dimensions,
   TouchableOpacity,
   Text,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/Navigation';
-import { RootScreens } from '@/Screens';
-import { COLORS } from '@/constants/theme';
-import { OnboardingPage1 } from './OnboardingPage1';
-import { OnboardingPage2 } from './OnboardingPage2';
-import { OnboardingPage3 } from './OnboardingPage3';
-import { OnboardingPage4 } from './OnboardingPage4';
-import { OnboardingPage5 } from './OnboardingPage5';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
+import { RootScreens } from "@/Screens";
+import { COLORS } from "@/constants/theme";
+import { OnboardingPage1 } from "./OnboardingPage1";
+import { OnboardingPage2 } from "./OnboardingPage2";
+import { OnboardingPage3 } from "./OnboardingPage3";
+import { OnboardingPage4 } from "./OnboardingPage4";
+import { OnboardingPage5 } from "./OnboardingPage5";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export const Onboarding = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const onboardingPages = [
     <OnboardingPage1 />,
@@ -41,13 +42,13 @@ export const Onboarding = () => {
         animated: true,
       });
     } else {
-      // Navigate to login screen when onboarding is complete
-      navigation.replace(RootScreens.LOGIN);
+      // Navigate to main app when onboarding is complete
+      navigation.replace(RootScreens.MAIN);
     }
   };
 
   const handleSkip = () => {
-    navigation.replace(RootScreens.LOGIN);
+    navigation.replace(RootScreens.MAIN);
   };
 
   const handleViewableItemsChanged = ({ viewableItems }: any) => {
@@ -68,7 +69,10 @@ export const Onboarding = () => {
             key={index}
             style={[
               styles.dot,
-              { backgroundColor: index === currentIndex ? COLORS.primary : '#D9D9D9' },
+              {
+                backgroundColor:
+                  index === currentIndex ? COLORS.primary : "#D9D9D9",
+              },
             ]}
           />
         ))}
@@ -77,7 +81,9 @@ export const Onboarding = () => {
   };
 
   const getButtonText = () => {
-    return currentIndex === onboardingPages.length - 1 ? 'Hoàn thành' : 'Tiếp theo';
+    return currentIndex === onboardingPages.length - 1
+      ? "Hoàn thành"
+      : "Tiếp theo";
   };
 
   return (
@@ -114,24 +120,24 @@ export const Onboarding = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   pageContainer: {
     width,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingBottom: 30,
   },
   dotsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dot: {
     width: 8,
@@ -155,6 +161,6 @@ const styles = StyleSheet.create({
   nextText: {
     color: COLORS.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

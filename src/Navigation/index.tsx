@@ -9,6 +9,7 @@ import { LoginContainer } from "@/Screens/Login";
 import { RegisterContainer } from "@/Screens/Register";
 import { ForgotPasswordContainer } from "@/Screens/ForgotPassword";
 import { RootScreens } from "@/Screens";
+import { AuthGuard } from "@/Components";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
@@ -31,30 +32,38 @@ const ApplicationNavigator = () => {
   return (
     <NavigationContainer>
       <StatusBar />
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen
-          name={RootScreens.WELCOME}
-          component={WelcomeContainer}
-        />
-        <RootStack.Screen
-          name={RootScreens.ONBOARDING}
-          component={OnboardingContainer}
-        />
-        <RootStack.Screen name={RootScreens.LOGIN} component={LoginContainer} />
-        <RootStack.Screen
-          name={RootScreens.REGISTER}
-          component={RegisterContainer}
-        />
-        <RootStack.Screen
-          name={RootScreens.FORGOT_PASSWORD}
-          component={ForgotPasswordContainer}
-        />
-        <RootStack.Screen
-          name={RootScreens.MAIN}
-          component={MainNavigator}
-          options={{}}
-        />
-      </RootStack.Navigator>
+      <AuthGuard>
+        <RootStack.Navigator
+          screenOptions={{ headerShown: false }}
+          initialRouteName={RootScreens.WELCOME}
+        >
+          <RootStack.Screen
+            name={RootScreens.WELCOME}
+            component={WelcomeContainer}
+          />
+          <RootStack.Screen
+            name={RootScreens.ONBOARDING}
+            component={OnboardingContainer}
+          />
+          <RootStack.Screen
+            name={RootScreens.LOGIN}
+            component={LoginContainer}
+          />
+          <RootStack.Screen
+            name={RootScreens.REGISTER}
+            component={RegisterContainer}
+          />
+          <RootStack.Screen
+            name={RootScreens.FORGOT_PASSWORD}
+            component={ForgotPasswordContainer}
+          />
+          <RootStack.Screen
+            name={RootScreens.MAIN}
+            component={MainNavigator}
+            options={{}}
+          />
+        </RootStack.Navigator>
+      </AuthGuard>
     </NavigationContainer>
   );
 };

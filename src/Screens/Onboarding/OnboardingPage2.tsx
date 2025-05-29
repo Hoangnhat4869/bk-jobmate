@@ -1,4 +1,3 @@
-import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { COLORS } from "@/constants/theme";
 
@@ -7,7 +6,7 @@ export const OnboardingPage2 = () => {
     <View style={styles.container}>
       <View style={styles.imageContainer}>
         <Image
-          source={require("src/assets/images/logo.png")}
+          source={require("@/assets/images/logo.png")}
           style={styles.image}
           resizeMode="contain"
         />
@@ -47,7 +46,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: COLORS.textPrimary,
+    color: COLORS.text,
     textAlign: "center",
     marginBottom: 16,
   },

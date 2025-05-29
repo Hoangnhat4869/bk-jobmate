@@ -2,76 +2,175 @@
 
 This guide will help you set up Google Authentication for the BKJobmate app.
 
+## Prerequisites
+
+- Expo CLI installed
+- Google Cloud Console account
+- App running on Expo
+
 ## 1. Create a Google Cloud Project
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select an existing one
 3. Navigate to "APIs & Services" > "OAuth consent screen"
-4. Configure the OAuth consent screen (External or Internal)
-5. Add necessary scopes (email, profile)
-6. Add test users if needed
+4. Configure the OAuth consent screen:
+   - Choose "External" for public apps
+   - Fill in required fields:
+     - App name: BKJobmate
+     - User support email
+     - Developer contact information
+5. Add necessary scopes:
+   - `.../auth/userinfo.email`
+   - `.../auth/userinfo.profile`
+   - `openid`
+6. Add test users if in testing phase
 
-## 2. Create OAuth 2.0 Client IDs
+## 2. Enable Required APIs
+
+1. Navigate to "APIs & Services" > "Library"
+2. Search for and enable:
+   - Google+ API (or People API)
+   - Google OAuth2 API
+
+## 3. Create OAuth 2.0 Client IDs
 
 1. Navigate to "APIs & Services" > "Credentials"
 2. Click "Create Credentials" > "OAuth client ID"
 3. Create client IDs for each platform:
 
-### Android
+### For Development (Expo Go)
 
-- Application type: Android
-- Name: BKJobmate Android
-- Package name: `com.bkjobmate.app`
-- SHA-1 certificate fingerprint: (Generate this from your keystore)
-
-### iOS
-
-- Application type: iOS
-- Name: BKJobmate iOS
-- Bundle ID: `com.bkjobmate.app`
-
-### Web
+**Web Client ID (Required for Expo)**
 
 - Application type: Web application
 - Name: BKJobmate Web
-- Authorized JavaScript origins: `https://auth.expo.io`
-- Authorized redirect URIs: `https://auth.expo.io/@your-expo-username/bk-jobmate`
+- Authorized JavaScript origins:
+  - `https://auth.expo.io`
+- Authorized redirect URIs:
+  - `https://auth.expo.io/@your-expo-username/bk-jobmate`
+  - Replace `your-expo-username` with your actual Expo username
 
-## 3. Update the AuthContext.tsx file
+### For Production (Standalone Apps)
 
-Open `src/Context/AuthContext.tsx` and update the following lines with your client IDs:
+**Android**
 
-```typescript
-// Initialize Google Auth
-const [_, response, promptAsync] = Google.useAuthRequest({
-  androidClientId:
-    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your Android client ID
-  iosClientId:
-    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your iOS client ID
-  webClientId:
-    "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com", // Replace with your Web client ID
-});
-```
+- Application type: Android
+- Name: BKJobmate Android
+- Package name: `com.hoangnhat4869.bkjobmate` (from your app.json)
+- SHA-1 certificate fingerprint: (Generate this - see section 4)
 
-## 4. Generate SHA-1 Certificate Fingerprint
+**iOS**
 
-For Android, you need to provide a SHA-1 certificate fingerprint. You can generate this using the following command:
+- Application type: iOS
+- Name: BKJobmate iOS
+- Bundle ID: `com.hoangnhat4869.bkjobmate` (from your app.json)
+
+## 4. Generate SHA-1 Certificate Fingerprint (Android Only)
+
+### For Development (Debug)
 
 ```bash
+# Windows (PowerShell)
+keytool -list -v -keystore $env:USERPROFILE\.android\debug.keystore -alias androiddebugkey -storepass android -keypass android
+
+# macOS/Linux
 keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
 ```
 
-## 5. Testing
+### For Production
 
-1. Run the app on your device or emulator
-2. Navigate to the Login screen
-3. Tap "Sign in with Google"
-4. You should be redirected to the Google sign-in page
-5. After signing in, you should be redirected back to the app
+```bash
+# Use your production keystore
+keytool -list -v -keystore path/to/your/production.keystore -alias your-alias
+```
+
+## 5. Configure Environment Variables
+
+1. Create or update your `.env` file in the project root:
+
+```env
+EXPO_PUBLIC_ANDROID_CLIENT_ID=your-android-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_IOS_CLIENT_ID=your-ios-client-id.apps.googleusercontent.com
+EXPO_PUBLIC_WEB_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+```
+
+2. The AuthContext.tsx is already configured to use these environment variables.
+
+## 6. Update app.json (if needed)
+
+Ensure your `app.json` has the correct bundle identifier:
+
+```json
+{
+  "expo": {
+    "slug": "bk-jobmate",
+    "ios": {
+      "bundleIdentifier": "com.hoangnhat4869.bkjobmate"
+    },
+    "android": {
+      "package": "com.hoangnhat4869.bkjobmate"
+    }
+  }
+}
+```
+
+## 7. Testing
+
+### Development (Expo Go)
+
+1. Start your development server: `npm start`
+2. Open the app in Expo Go
+3. Navigate to the Login screen
+4. Tap "Đăng nhập với Google"
+5. You should be redirected to Google sign-in
+6. After signing in, you should return to the app
+
+### Production (Standalone App)
+
+1. Build and install the standalone app
+2. Test Google authentication
+3. Verify that the redirect works correctly
+
+## Current Configuration
+
+The app is currently configured with:
+
+- Bundle ID: `com.hoangnhat4869.bkjobmate`
+- Redirect URI pattern: Uses Expo's default handling
+- Scopes: `openid`, `profile`, `email`
 
 ## Troubleshooting
 
-- Make sure the package name in app.json matches the one you used in Google Cloud Console
-- Verify that all client IDs are correctly entered in the AuthContext.tsx file
-- Check that you have the correct SHA-1 fingerprint for Android
-- Ensure that you have added the necessary scopes in the OAuth consent screen
+### Common Issues:
+
+1. **"OAuth client not found" error**
+
+   - Verify client IDs in `.env` file
+   - Ensure client IDs match the platform you're testing on
+
+2. **Redirect URI mismatch**
+
+   - For Expo Go: Use web client ID and check redirect URI in Google Console
+   - For standalone: Ensure bundle ID/package name matches
+
+3. **"Access blocked" error**
+
+   - Check OAuth consent screen configuration
+   - Verify app is published or user is added as test user
+
+4. **Network/Connection issues**
+   - Ensure device has internet connection
+   - Check if Google services are accessible
+
+### Debug Steps:
+
+1. Check console logs for detailed error messages
+2. Verify environment variables are loaded correctly
+3. Test with a different Google account
+4. Try on different devices/emulators
+
+### Getting Help:
+
+- Check [Expo documentation](https://docs.expo.dev/guides/authentication/#google)
+- Review [Google OAuth documentation](https://developers.google.com/identity/protocols/oauth2)
+- Check the AuthContext.tsx implementation for any additional debug logs

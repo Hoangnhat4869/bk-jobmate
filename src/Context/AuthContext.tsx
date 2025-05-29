@@ -1,8 +1,21 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import * as SecureStore from "expo-secure-store";
 import { Platform } from "react-native";
+
+// Constants
+const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID || "";
+const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_CLIENT_ID || "";
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "";
+const USER_STORAGE_KEY = "user";
 
 // Define types for our context
 export type User = {
@@ -10,31 +23,42 @@ export type User = {
   email: string;
   displayName: string;
   photoURL?: string;
+  authMethod?: "email" | "google";
 };
 
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, name?: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   error: string | null;
+  clearError: () => void;
 };
 
 // Create the context with a default value
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isLoading: false,
+  isAuthenticated: false,
   signIn: async () => {},
   signUp: async () => {},
   signOut: async () => {},
   signInWithGoogle: async () => {},
   error: null,
+  clearError: () => {},
 });
 
 // Custom hook to use the auth context
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
 
 // Initialize WebBrowser for Expo Auth Session
 WebBrowser.maybeCompleteAuthSession();
@@ -47,30 +71,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize Google Auth
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId:
-      "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com",
-    iosClientId:
-      "916197727859-710m45q3vuihkikgk92av3fr8bjgejaq.apps.googleusercontent.com",
-    webClientId:
-      "916197727859-m5c57q0il4us2l93qij4rnsr9k43hhmh.apps.googleusercontent.com",
+  // Memoized computed values
+  const isAuthenticated = useMemo(() => !!user, [user]);
+
+  // Clear error function
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  // Initialize Google Auth with better configuration
+  const [, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: ANDROID_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
+    webClientId: WEB_CLIENT_ID,
     redirectUri: Platform.select({
       web: typeof window !== "undefined" ? window.location.origin : undefined,
       default: undefined,
     }),
+    scopes: ["openid", "profile", "email"],
   });
-
-  // const [_, response, promptAsync] = Google.useAuthRequest({
-  //   clientId: process.env.EXPO_CLIENT_ID,
-  //   androidClientId: process.env.ANDROID_CLIENT_ID,
-  //   iosClientId: process.env.IOS_CLIENT_ID,
-  //   webClientId: process.env.WEB_CLIENT_ID,
-  //   redirectUri: Platform.select({
-  //     web: typeof window !== "undefined" ? window.location.origin : undefined,
-  //     default: undefined,
-  //   }),
-  // });
 
   // Check for stored user on app load
   useEffect(() => {
@@ -79,10 +98,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         let userJSON;
         // Check if SecureStore is available (not available on web)
         if (Platform.OS !== "web") {
-          userJSON = await SecureStore.getItemAsync("user");
+          userJSON = await SecureStore.getItemAsync(USER_STORAGE_KEY);
         } else {
           // Use localStorage for web
-          userJSON = localStorage.getItem("user");
+          userJSON = localStorage.getItem(USER_STORAGE_KEY);
         }
 
         if (userJSON) {
@@ -103,123 +122,146 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (response?.type === "success") {
       const { authentication } = response;
       console.log("Google Auth Success:", authentication);
-
-      // In a real app, you would exchange this token with your backend
-      // For now, we'll create a user from the token
-      const fetchUserInfo = async () => {
-        try {
-          setIsLoading(true);
-          setError(null);
-
-          // For demo purposes, we'll just create a mock user
-          // In a real app, you would fetch user info from Google API
-          const mockUser = {
-            id: "google-user-id-" + Date.now(),
-            email: "user@example.com",
-            displayName: "Google User",
-            photoURL: "https://via.placeholder.com/150",
-          };
-
-          handleUserLogin(mockUser);
-        } catch (e) {
-          console.error("Error fetching Google user info:", e);
-          setError(
-            e instanceof Error
-              ? e.message
-              : "Failed to get user info from Google"
-          );
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchUserInfo();
+      handleGoogleAuthSuccess(authentication?.accessToken);
     } else if (response?.type === "error") {
       console.error("Google Auth Error:", response.error);
       setError(response.error?.message || "Google authentication failed");
     }
   }, [response]);
 
-  const handleUserLogin = async (userData: User) => {
+  // Handle Google authentication success
+  const handleGoogleAuthSuccess = useCallback(async (accessToken?: string) => {
+    if (!accessToken) {
+      setError("No access token received from Google");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Fetch user info from Google API
+      const userInfoResponse = await fetch(
+        `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`
+      );
+
+      if (!userInfoResponse.ok) {
+        throw new Error("Failed to fetch user info from Google");
+      }
+
+      const googleUserInfo = await userInfoResponse.json();
+
+      const user: User = {
+        id: googleUserInfo.id,
+        email: googleUserInfo.email,
+        displayName: googleUserInfo.name || googleUserInfo.email.split("@")[0],
+        photoURL: googleUserInfo.picture,
+        authMethod: "google",
+      };
+
+      await handleUserLogin(user);
+    } catch (e) {
+      console.error("Error handling Google auth success:", e);
+      setError(
+        e instanceof Error ? e.message : "Failed to get user info from Google"
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const handleUserLogin = useCallback(async (userData: User) => {
     setUser(userData);
     try {
       // Check if SecureStore is available (not available on web)
       if (Platform.OS !== "web") {
-        await SecureStore.setItemAsync("user", JSON.stringify(userData));
+        await SecureStore.setItemAsync(
+          USER_STORAGE_KEY,
+          JSON.stringify(userData)
+        );
       } else {
         // Use localStorage for web
-        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
       }
     } catch (error) {
       console.error("Error saving user data:", error);
     }
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const signIn = useCallback(
+    async (email: string, password: string) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      // Mock authentication - replace with actual authentication
-      if (email && password) {
-        const mockUser = {
-          id: "123",
-          email,
-          displayName: email.split("@")[0],
-        };
-        await handleUserLogin(mockUser);
-      } else {
-        throw new Error("Email and password are required");
+        // Mock authentication - replace with actual authentication
+        if (email && password) {
+          const mockUser: User = {
+            id: "123",
+            email,
+            displayName: email.split("@")[0],
+            authMethod: "email",
+          };
+          await handleUserLogin(mockUser);
+        } else {
+          throw new Error("Email and password are required");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "An unknown error occurred");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [handleUserLogin]
+  );
 
-  const signUp = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const signUp = useCallback(
+    async (email: string, password: string, name?: string) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      // Mock registration - replace with actual registration
-      if (email && password) {
-        const mockUser = {
-          id: "123",
-          email,
-          displayName: email.split("@")[0],
-        };
-        await handleUserLogin(mockUser);
-      } else {
-        throw new Error("Email and password are required");
+        // Mock registration - replace with actual registration
+        if (email && password) {
+          const mockUser: User = {
+            id: "123",
+            email,
+            displayName: name || email.split("@")[0],
+            authMethod: "email",
+          };
+          await handleUserLogin(mockUser);
+        } else {
+          throw new Error("Email and password are required");
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "An unknown error occurred");
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [handleUserLogin]
+  );
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       setIsLoading(true);
       // Check if SecureStore is available (not available on web)
       if (Platform.OS !== "web") {
-        await SecureStore.deleteItemAsync("user");
+        await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
       } else {
         // Use localStorage for web
-        localStorage.removeItem("user");
+        localStorage.removeItem(USER_STORAGE_KEY);
       }
       setUser(null);
+      setError(null);
     } catch (e) {
       console.error("Error signing out", e);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -257,21 +299,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [promptAsync]);
+
+  // Memoized context value to prevent unnecessary re-renders
+  const contextValue = useMemo(
+    () => ({
+      user,
+      isLoading,
+      isAuthenticated,
+      signIn,
+      signUp,
+      signOut,
+      signInWithGoogle,
+      error,
+      clearError,
+    }),
+    [
+      user,
+      isLoading,
+      isAuthenticated,
+      signIn,
+      signUp,
+      signOut,
+      signInWithGoogle,
+      error,
+      clearError,
+    ]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        signIn,
-        signUp,
-        signOut,
-        signInWithGoogle,
-        error,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };

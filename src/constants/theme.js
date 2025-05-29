@@ -1,6 +1,7 @@
 // src/constants/theme.js
 export const COLORS = {
   primary: "#6366F1", // Purple color from screenshots
+  primaryLight: "#E0E7FF", // Light version of primary color
   secondary: "#A855F7",
   background: "#FFFFFF",
   cardBackground: "#FFFFFF",

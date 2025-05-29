@@ -31,3 +31,7 @@ export * from "./Logo";
 // Export icon components
 export * from "./SVGIcon";
 export * from "./IconButton";
+
+// Export utility components
+export * from "./AuthGuard";
+export * from "./ErrorMessage";

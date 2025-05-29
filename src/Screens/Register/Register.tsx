@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -11,16 +11,21 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "@/Context/AuthContext";
+import { useAuthNavigation } from "@/Hooks";
 import { COLORS } from "@/constants/theme";
 import { RootScreens } from "..";
 import { RootStackParamList } from "@/Navigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Input, Button, Typography } from "@/Components";
+import { Input, Button, Typography, ErrorMessage } from "@/Components";
 import { Logo } from "@/assets/svgs";
 
 export const Register = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { signUp, isLoading, error, isAuthenticated } = useAuth();
+  const { navigateToLogin, navigateToMain, handleClearError } =
+    useAuthNavigation();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,24 +33,38 @@ export const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [validationError, setValidationError] = useState("");
+
+  // Navigate to main when authentication is successful
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigateToMain();
+    }
+  }, [isAuthenticated, navigateToMain]);
+
+  // Clear errors when user starts typing
+  useEffect(() => {
+    if (name || email || password || confirmPassword) {
+      setValidationError("");
+      handleClearError();
+    }
+  }, [name, email, password, confirmPassword, handleClearError]);
 
   const validateForm = () => {
     if (!name) {
-      setError("Vui lòng nhập họ tên");
+      setValidationError("Vui lòng nhập họ tên");
       return false;
     }
     if (!email || !email.includes("@")) {
-      setError("Vui lòng nhập email hợp lệ");
+      setValidationError("Vui lòng nhập email hợp lệ");
       return false;
     }
     if (!password || password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setValidationError("Mật khẩu phải có ít nhất 6 ký tự");
       return false;
     }
     if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setValidationError("Mật khẩu xác nhận không khớp");
       return false;
     }
     return true;
@@ -54,20 +73,8 @@ export const Register = () => {
   const handleRegister = async () => {
     if (!validateForm()) return;
 
-    setIsLoading(true);
-    setError("");
-
-    try {
-      // Giả lập API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Giả lập thành công và chuyển hướng đến màn hình đăng nhập
-      navigation.navigate(RootScreens.LOGIN);
-    } catch (err) {
-      setError("Đã xảy ra lỗi. Vui lòng thử lại sau.");
-    } finally {
-      setIsLoading(false);
-    }
+    setValidationError("");
+    await signUp(email, password, name);
   };
 
   return (
@@ -167,7 +174,12 @@ export const Register = () => {
               inputStyle={styles.inputText}
             />
 
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            {(validationError || error) && (
+              <ErrorMessage
+                message={validationError || error}
+                onDismiss={handleClearError}
+              />
+            )}
 
             <Button
               title="Đăng ký"
@@ -179,9 +191,7 @@ export const Register = () => {
 
             <View style={styles.loginContainer}>
               <Text style={styles.loginText}>Đã có tài khoản? </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate(RootScreens.LOGIN)}
-              >
+              <TouchableOpacity onPress={navigateToLogin}>
                 <Text style={styles.loginLink}>Đăng nhập</Text>
               </TouchableOpacity>
             </View>
