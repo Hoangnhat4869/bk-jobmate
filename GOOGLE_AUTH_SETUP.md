@@ -1,12 +1,13 @@
 # Google Authentication Setup for BKJobmate
 
-This guide will help you set up Google Authentication for the BKJobmate app.
+This guide will help you set up Google Authentication for the BKJobmate app with the new cyese.me API backend.
 
 ## Prerequisites
 
 - Expo CLI installed
 - Google Cloud Console account
 - App running on Expo
+- Backend API running on https://api.cyese.me/
 
 ## 1. Create a Google Cloud Project
 
@@ -37,6 +38,17 @@ This guide will help you set up Google Authentication for the BKJobmate app.
 1. Navigate to "APIs & Services" > "Credentials"
 2. Click "Create Credentials" > "OAuth client ID"
 3. Create client IDs for each platform:
+
+### For Backend API Integration
+
+**Web Client ID (For Backend)**
+
+- Application type: Web application
+- Name: BKJobmate API Backend
+- Authorized JavaScript origins:
+  - `https://api.cyese.me`
+- Authorized redirect URIs:
+  - `https://api.cyese.me/auth/google/callback`
 
 ### For Development (Expo Go)
 

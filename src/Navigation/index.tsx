@@ -10,6 +10,7 @@ import { RegisterContainer } from "@/Screens/Register";
 import { ForgotPasswordContainer } from "@/Screens/ForgotPassword";
 import { RootScreens } from "@/Screens";
 import { AuthGuard } from "@/Components";
+import { linking } from "./linking";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
@@ -23,6 +24,8 @@ export type RootStackParamList = {
   [RootScreens.FORUM]: undefined;
   [RootScreens.CHAT]: undefined;
   [RootScreens.PROFILE]: undefined;
+  [RootScreens.EDIT_PROFILE]: undefined;
+  [RootScreens.SETTINGS]: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -30,7 +33,7 @@ const RootStack = createNativeStackNavigator<RootStackParamList>();
 // @refresh reset
 const ApplicationNavigator = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <StatusBar />
       <AuthGuard>
         <RootStack.Navigator
@@ -69,3 +72,4 @@ const ApplicationNavigator = () => {
 };
 
 export { ApplicationNavigator };
+export default ApplicationNavigator;

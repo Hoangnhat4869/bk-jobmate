@@ -132,7 +132,7 @@ export const Profile = () => {
               title="Chỉnh sửa"
               variant="outline"
               size="small"
-              onPress={() => {}}
+              onPress={() => navigation.navigate(RootScreens.EDIT_PROFILE)}
               style={styles.editButton}
               icon={
                 <Ionicons
@@ -147,7 +147,7 @@ export const Profile = () => {
               title="Cài đặt"
               variant="outline"
               size="small"
-              onPress={() => setRefreshKey((prev) => prev + 1)}
+              onPress={() => navigation.navigate(RootScreens.SETTINGS)}
               style={styles.settingsButton}
               icon={
                 <Ionicons

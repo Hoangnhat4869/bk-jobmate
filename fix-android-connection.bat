@@ -15,7 +15,7 @@ adb devices
 
 echo 5. Checking TCP ports...
 netstat -ano | findstr "5554"
-netstat -ano | findstr "8081"
+netstat -ano | findstr "3000"
 
 echo 6. Trying to connect to emulator...
 adb connect 127.0.0.1:5554

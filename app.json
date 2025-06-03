@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "com.bkjobmate.app",
+    "scheme": "com.bkjobmate",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -18,9 +18,7 @@
       "enabled": true,
       "checkAutomatically": "ON_LOAD"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.bkjobmate.app"
@@ -40,12 +38,13 @@
             {
               "scheme": "https",
               "host": "*.bkjobmate.app"
+            },
+            {
+              "scheme": "com.bkjobmate",
+              "host": "auth"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -58,10 +57,7 @@
         "hmr": true
       }
     },
-    "plugins": [
-      "expo-localization",
-      "expo-secure-store"
-    ],
+    "plugins": ["expo-localization", "expo-secure-store"],
     "extra": {
       "eas": {
         "projectId": "1d40eac5-ba40-488d-8449-cc7158f32f1c"

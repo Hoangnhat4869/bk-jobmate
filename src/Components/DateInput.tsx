@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   TextInput,
@@ -7,17 +7,17 @@ import {
   TouchableOpacity,
   Modal,
   Platform,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS } from '../constants/theme';
-import { DateInputProps } from './Input.props';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { COLORS } from "../constants/theme";
+import { DateInputProps } from "./Input.props";
 
 export const DateInput = ({
   label,
   date,
   onDateChange,
-  placeholder = 'Select date',
-  format = 'MM/DD/YYYY',
+  placeholder = "Select date",
+  format = "MM/DD/YYYY",
   minDate,
   maxDate,
   error,
@@ -35,26 +35,26 @@ export const DateInput = ({
   const [showPicker, setShowPicker] = useState(showPickerProp);
 
   const formatDate = (date: Date | null): string => {
-    if (!date) return '';
-    
-    const day = date.getDate().toString().padStart(2, '0');
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    if (!date) return "";
+
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
     const year = date.getFullYear();
-    
-    if (format === 'MM/DD/YYYY') {
+
+    if (format === "MM/DD/YYYY") {
       return `${month}/${day}/${year}`;
-    } else if (format === 'DD/MM/YYYY') {
+    } else if (format === "DD/MM/YYYY") {
       return `${day}/${month}/${year}`;
-    } else if (format === 'YYYY-MM-DD') {
+    } else if (format === "YYYY-MM-DD") {
       return `${year}-${month}-${day}`;
     }
-    
+
     return `${month}/${day}/${year}`;
   };
 
   const handlePress = () => {
     if (disabled) return;
-    
+
     setShowPicker(true);
     if (onPickerOpen) {
       onPickerOpen();
@@ -62,13 +62,13 @@ export const DateInput = ({
   };
 
   const handleDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowPicker(false);
       if (onPickerClose) {
         onPickerClose();
       }
     }
-    
+
     if (selectedDate) {
       if (onDateChange) {
         onDateChange(selectedDate);
@@ -85,7 +85,13 @@ export const DateInput = ({
 
   // Note: This is a placeholder for the DateTimePicker component
   // In a real implementation, you would import DateTimePicker from '@react-native-community/datetimepicker'
-  const DateTimePicker = ({ visible, value, onChange, minimumDate, maximumDate }: any) => {
+  const DateTimePicker = ({
+    visible,
+    value,
+    onChange,
+    minimumDate,
+    maximumDate,
+  }: any) => {
     // This is just a placeholder component
     // In a real implementation, you would return the actual DateTimePicker component
     return (
@@ -98,7 +104,9 @@ export const DateInput = ({
           </View>
           <View style={styles.pickerContent}>
             <Text>Date Picker Placeholder</Text>
-            <Text>You need to install @react-native-community/datetimepicker</Text>
+            <Text>
+              You need to install @react-native-community/datetimepicker
+            </Text>
           </View>
         </View>
       </Modal>
@@ -123,7 +131,7 @@ export const DateInput = ({
         >
           <TextInput
             style={[styles.input, inputStyle]}
-            value={formatDate(date)}
+            value={formatDate(date || null)}
             placeholder={placeholder}
             placeholderTextColor={COLORS.placeholder}
             onFocus={() => {
@@ -137,11 +145,7 @@ export const DateInput = ({
           />
 
           <View style={styles.rightIcon}>
-            <Ionicons
-              name="calendar-outline"
-              size={20}
-              color={COLORS.text}
-            />
+            <Ionicons name="calendar-outline" size={20} color={COLORS.text} />
           </View>
         </View>
       </TouchableOpacity>
@@ -164,17 +168,17 @@ export const DateInput = ({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
-    width: '100%',
+    width: "100%",
   },
   label: {
     fontSize: 14,
     marginBottom: 8,
     color: COLORS.text,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 8,
@@ -203,27 +207,27 @@ const styles = StyleSheet.create({
   },
   pickerContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   pickerHeader: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     padding: 16,
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: "#e0e0e0",
   },
   pickerDoneText: {
     color: COLORS.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   pickerContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
     height: 250,
   },
 });

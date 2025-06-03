@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import { COLORS } from "@/constants/theme";
+import { COLORS, FONTS, SPACING } from "@/constants/theme";
 
 export const OnboardingPage5 = () => {
   return (
@@ -12,9 +12,10 @@ export const OnboardingPage5 = () => {
         />
       </View>
       <View style={styles.contentContainer}>
-        <Text style={styles.title}>Đề xuất lộ trình</Text>
+        <Text style={styles.title}>Lộ trình cá nhân hóa</Text>
         <Text style={styles.description}>
-          Đề xuất lộ trình cá nhân hóa thông qua mục tiêu
+          Hệ thống đề xuất lộ trình học tập phù hợp với mục tiêu nghề nghiệp của
+          bạn
         </Text>
       </View>
     </View>
@@ -26,34 +27,47 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.background,
   },
   imageContainer: {
-    width: "100%",
+    width: 250,
     height: 250,
-    backgroundColor: "#F5F5F5",
+    borderRadius: 125,
+    backgroundColor: "#F9F0FF",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40,
+    marginBottom: SPACING.xl * 2,
+    shadowColor: "#722ED1",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
   },
   image: {
-    width: "80%",
-    height: "80%",
+    width: 150,
+    height: 150,
   },
   contentContainer: {
     alignItems: "center",
+    maxWidth: "90%",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: FONTS.sizes["2xl"],
+    fontWeight: "700" as const,
     color: COLORS.text,
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: SPACING.md,
+    lineHeight: 32,
   },
   description: {
-    fontSize: 16,
+    fontSize: FONTS.sizes.md,
     color: COLORS.textSecondary,
     textAlign: "center",
-    paddingHorizontal: 20,
+    lineHeight: 24,
+    paddingHorizontal: SPACING.md,
   },
 });

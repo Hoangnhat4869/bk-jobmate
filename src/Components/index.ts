@@ -35,3 +35,11 @@ export * from "./IconButton";
 // Export utility components
 export * from "./AuthGuard";
 export * from "./ErrorMessage";
+
+// Export course-related components
+export * from "./CourseList";
+export * from "./CourseDetail";
+export * from "./LessonDetail";
+export * from "./QuestionCard";
+export * from "./QuizResults";
+export * from "./ProgressTracker";

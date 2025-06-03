@@ -13,6 +13,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "@/Context/AuthContext";
 import { useAuthNavigation } from "@/Hooks";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
 import { COLORS } from "@/constants/theme";
 import { RootScreens } from "..";
 import { Input, Button, Typography, ErrorMessage } from "@/Components";
@@ -23,10 +26,14 @@ export const SimpleLogin = () => {
     useAuth();
   const { navigateToRegister, navigateToMain, handleClearError } =
     useAuthNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [validationError, setValidationError] = useState("");
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false);
 
   // Navigate to main when authentication is successful
   useEffect(() => {
@@ -35,15 +42,17 @@ export const SimpleLogin = () => {
     }
   }, [isAuthenticated, navigateToMain]);
 
-  // Clear errors when component unmounts or user starts typing
+  // Clear errors when user starts typing (only after first attempt)
   useEffect(() => {
-    if (email || password) {
+    if (hasAttemptedLogin && (email || password)) {
       setValidationError("");
       handleClearError();
     }
-  }, [email, password, handleClearError]);
+  }, [email, password, handleClearError, hasAttemptedLogin]);
 
   const handleLogin = async () => {
+    setHasAttemptedLogin(true);
+
     if (!email || !password) {
       setValidationError("Email và mật khẩu không được để trống");
       return;
@@ -54,7 +63,16 @@ export const SimpleLogin = () => {
   };
 
   const handleGoogleLogin = async () => {
-    await signInWithGoogle();
+    try {
+      setIsGoogleLoading(true);
+      setValidationError("");
+      handleClearError();
+      await signInWithGoogle();
+    } catch (err) {
+      console.error("Google login error:", err);
+    } finally {
+      setIsGoogleLoading(false);
+    }
   };
 
   return (
@@ -114,7 +132,13 @@ export const SimpleLogin = () => {
             {(validationError || error) && (
               <ErrorMessage
                 message={validationError || error}
-                onDismiss={handleClearError}
+                onDismiss={() => {
+                  setValidationError("");
+                  handleClearError();
+                }}
+                variant="inline"
+                showIcon={true}
+                style={styles.errorMessage}
               />
             )}
 
@@ -129,7 +153,7 @@ export const SimpleLogin = () => {
             <View style={styles.forgotPasswordContainer}>
               <TouchableOpacity
                 onPress={() => {
-                  /* TODO: Navigate to forgot password */
+                  navigation.navigate(RootScreens.FORGOT_PASSWORD);
                 }}
               >
                 <Text style={styles.forgotPasswordText}>Quên mật khẩu?</Text>
@@ -155,6 +179,8 @@ export const SimpleLogin = () => {
               variant="outline"
               style={styles.googleButton}
               size="large"
+              isLoading={isGoogleLoading}
+              disabled={isLoading || isGoogleLoading}
             />
           </View>
 
@@ -258,5 +284,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#EF4444",
     textAlign: "center",
+  },
+  errorMessage: {
+    marginBottom: 16,
+    marginTop: 8,
   },
 });

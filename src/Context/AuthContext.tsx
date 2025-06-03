@@ -8,13 +8,19 @@ import React, {
 } from "react";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import * as SecureStore from "expo-secure-store";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from "react-native";
+import {
+  useLoginMutation,
+  useRegisterMutation,
+  useGoogleAuthMutation,
+  useLogoutMutation,
+  useGetProfileQuery,
+  TokenManager,
+} from "@/Services";
+import { Config } from "@/Config";
 
-// Constants
-const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_ANDROID_CLIENT_ID || "";
-const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_IOS_CLIENT_ID || "";
-const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_WEB_CLIENT_ID || "";
+// Storage keys
 const USER_STORAGE_KEY = "user";
 
 // Define types for our context
@@ -71,6 +77,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  // API mutations
+  const [loginMutation] = useLoginMutation();
+  const [registerMutation] = useRegisterMutation();
+  const [googleAuthMutation] = useGoogleAuthMutation();
+  const [logoutMutation] = useLogoutMutation();
+
   // Memoized computed values
   const isAuthenticated = useMemo(() => !!user, [user]);
 
@@ -79,32 +91,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setError(null);
   }, []);
 
-  // Initialize Google Auth with better configuration
+  // Initialize Google Auth with configuration from Config
   const [, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: ANDROID_CLIENT_ID,
-    iosClientId: IOS_CLIENT_ID,
-    webClientId: WEB_CLIENT_ID,
+    androidClientId: Config.GOOGLE_OAUTH_CLIENT_ID.ANDROID,
+    iosClientId: Config.GOOGLE_OAUTH_CLIENT_ID.IOS,
+    webClientId: Config.GOOGLE_OAUTH_CLIENT_ID.WEB,
     redirectUri: Platform.select({
-      web: typeof window !== "undefined" ? window.location.origin : undefined,
+      android: Config.GOOGLE_OAUTH_REDIRECT_URI.ANDROID,
+      ios: Config.GOOGLE_OAUTH_REDIRECT_URI.IOS,
+      web:
+        Platform.OS === "web"
+          ? `${window.location.origin}/`
+          : Config.GOOGLE_OAUTH_REDIRECT_URI.WEB,
       default: undefined,
     }),
     scopes: ["openid", "profile", "email"],
+    // Add additional configuration for web
+    ...(Platform.OS === "web" && {
+      additionalParameters: {},
+      extraParams: {},
+    }),
   });
 
   // Check for stored user on app load
   useEffect(() => {
     const loadUser = async () => {
       try {
-        let userJSON;
-        // Check if SecureStore is available (not available on web)
-        if (Platform.OS !== "web") {
-          userJSON = await SecureStore.getItemAsync(USER_STORAGE_KEY);
-        } else {
-          // Use localStorage for web
-          userJSON = localStorage.getItem(USER_STORAGE_KEY);
-        }
+        const userJSON = await AsyncStorage.getItem(USER_STORAGE_KEY);
+        const token = await TokenManager.getToken();
 
-        if (userJSON) {
+        if (userJSON && token) {
           setUser(JSON.parse(userJSON));
         }
       } catch (e) {
@@ -122,71 +138,89 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (response?.type === "success") {
       const { authentication } = response;
       console.log("Google Auth Success:", authentication);
-      handleGoogleAuthSuccess(authentication?.accessToken);
+      handleGoogleAuthSuccess(
+        authentication?.accessToken,
+        authentication?.idToken
+      );
     } else if (response?.type === "error") {
       console.error("Google Auth Error:", response.error);
       setError(response.error?.message || "Google authentication failed");
     }
   }, [response]);
 
+  // Store user and tokens
+  const storeAuthData = useCallback(
+    async (userData: any, token: string, refreshToken: string) => {
+      try {
+        const user: User = {
+          id: userData.id,
+          email: userData.email,
+          displayName: userData.name || userData.displayName,
+          photoURL: userData.avatar,
+          authMethod: userData.authMethod || "email",
+        };
+
+        await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+        await TokenManager.setTokens(token, refreshToken);
+
+        setUser(user);
+      } catch (error) {
+        console.error("Failed to store auth data:", error);
+        throw error;
+      }
+    },
+    []
+  );
+
   // Handle Google authentication success
-  const handleGoogleAuthSuccess = useCallback(async (accessToken?: string) => {
-    if (!accessToken) {
-      setError("No access token received from Google");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      // Fetch user info from Google API
-      const userInfoResponse = await fetch(
-        `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`
-      );
-
-      if (!userInfoResponse.ok) {
-        throw new Error("Failed to fetch user info from Google");
+  const handleGoogleAuthSuccess = useCallback(
+    async (accessToken?: string, idToken?: string) => {
+      if (!accessToken) {
+        setError("No access token received from Google");
+        return;
       }
 
-      const googleUserInfo = await userInfoResponse.json();
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const user: User = {
-        id: googleUserInfo.id,
-        email: googleUserInfo.email,
-        displayName: googleUserInfo.name || googleUserInfo.email.split("@")[0],
-        photoURL: googleUserInfo.picture,
-        authMethod: "google",
-      };
+        // Send Google auth data to our backend
+        const result = await googleAuthMutation({
+          accessToken,
+          idToken,
+        }).unwrap();
 
-      await handleUserLogin(user);
-    } catch (e) {
-      console.error("Error handling Google auth success:", e);
-      setError(
-        e instanceof Error ? e.message : "Failed to get user info from Google"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+        if (result.success && result.data) {
+          // Ensure Google users have authMethod set to "google"
+          const userData = {
+            ...result.data.user,
+            authMethod: "google", // Force Google auth method
+          };
 
-  const handleUserLogin = useCallback(async (userData: User) => {
-    setUser(userData);
-    try {
-      // Check if SecureStore is available (not available on web)
-      if (Platform.OS !== "web") {
-        await SecureStore.setItemAsync(
-          USER_STORAGE_KEY,
-          JSON.stringify(userData)
+          await storeAuthData(
+            userData,
+            result.data.token,
+            result.data.refreshToken
+          );
+          console.log("Google authentication successful");
+        } else {
+          throw new Error(
+            result.error?.message || "Google authentication failed"
+          );
+        }
+      } catch (e: any) {
+        console.error("Error handling Google auth success:", e);
+        setError(
+          e?.data?.error?.message ||
+            e?.message ||
+            "Failed to authenticate with Google"
         );
-      } else {
-        // Use localStorage for web
-        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error saving user data:", error);
-    }
-  }, []);
+    },
+    [googleAuthMutation, storeAuthData]
+  );
 
   const signIn = useCallback(
     async (email: string, password: string) => {
@@ -194,25 +228,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(true);
         setError(null);
 
-        // Mock authentication - replace with actual authentication
-        if (email && password) {
-          const mockUser: User = {
-            id: "123",
-            email,
-            displayName: email.split("@")[0],
-            authMethod: "email",
-          };
-          await handleUserLogin(mockUser);
+        const result = await loginMutation({
+          email,
+          password,
+        }).unwrap();
+
+        if (result.success && result.data) {
+          await storeAuthData(
+            result.data.user,
+            result.data.token,
+            result.data.refreshToken
+          );
+          console.log("Login successful");
         } else {
-          throw new Error("Email and password are required");
+          throw new Error(result.error?.message || "Login failed");
         }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "An unknown error occurred");
+      } catch (e: any) {
+        console.error("Login error:", e);
+        setError(
+          e?.data?.error?.message ||
+            e?.message ||
+            "Login failed. Please check your credentials."
+        );
       } finally {
         setIsLoading(false);
       }
     },
-    [handleUserLogin]
+    [loginMutation, storeAuthData]
   );
 
   const signUp = useCallback(
@@ -221,45 +263,64 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setIsLoading(true);
         setError(null);
 
-        // Mock registration - replace with actual registration
-        if (email && password) {
-          const mockUser: User = {
-            id: "123",
-            email,
-            displayName: name || email.split("@")[0],
-            authMethod: "email",
-          };
-          await handleUserLogin(mockUser);
+        const result = await registerMutation({
+          email,
+          password,
+          name: name || email.split("@")[0],
+        }).unwrap();
+
+        if (result.success && result.data) {
+          await storeAuthData(
+            result.data.user,
+            result.data.token,
+            result.data.refreshToken
+          );
+          console.log("Registration successful");
         } else {
-          throw new Error("Email and password are required");
+          throw new Error(result.error?.message || "Registration failed");
         }
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "An unknown error occurred");
+      } catch (e: any) {
+        console.error("Registration error:", e);
+        setError(
+          e?.data?.error?.message ||
+            e?.message ||
+            "Registration failed. Please try again."
+        );
       } finally {
         setIsLoading(false);
       }
     },
-    [handleUserLogin]
+    [registerMutation, storeAuthData]
   );
 
   const signOut = useCallback(async () => {
     try {
       setIsLoading(true);
-      // Check if SecureStore is available (not available on web)
-      if (Platform.OS !== "web") {
-        await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
-      } else {
-        // Use localStorage for web
-        localStorage.removeItem(USER_STORAGE_KEY);
+
+      // Call logout API
+      try {
+        await logoutMutation().unwrap();
+      } catch (apiError) {
+        console.warn(
+          "Logout API call failed, continuing with local cleanup:",
+          apiError
+        );
       }
+
+      // Clear local storage
+      await AsyncStorage.removeItem(USER_STORAGE_KEY);
+      await TokenManager.clearAuthData();
+
       setUser(null);
       setError(null);
+      console.log("Logout successful");
     } catch (e) {
       console.error("Error signing out", e);
+      setError("Failed to sign out properly");
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [logoutMutation]);
 
   const signInWithGoogle = useCallback(async () => {
     try {
@@ -267,17 +328,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setError(null);
       console.log("Starting Google sign in...");
       console.log("Platform:", Platform.OS);
-      console.log(
-        "Redirect URI:",
-        Platform.OS === "web" ? window.location.origin : "Using Expo default"
-      );
+      console.log("Web Client ID:", Config.GOOGLE_OAUTH_CLIENT_ID.WEB);
+
+      const actualRedirectUri =
+        Platform.OS === "web"
+          ? `${window.location.origin}/`
+          : "Using Expo default";
+      console.log("Redirect URI being sent:", actualRedirectUri);
+      console.log("Current URL:", window.location.href);
+
+      // Check if client ID is configured
+      if (!Config.GOOGLE_OAUTH_CLIENT_ID.WEB) {
+        throw new Error(
+          "Google OAuth Web Client ID is not configured. Please check your environment variables."
+        );
+      }
 
       // Cấu hình tùy chọn cho promptAsync
       const options =
         Platform.OS === "web"
           ? {
               showInRecents: true,
-              promptParentId: "root", // ID của phần tử cha để hiển thị popup
             }
           : undefined;
 
@@ -287,9 +358,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Kiểm tra kết quả
       if (result.type !== "success") {
-        throw new Error(
-          `Google sign in was ${result.type}: ${JSON.stringify(result)}`
-        );
+        let errorMessage = "Google authentication failed";
+
+        if (result.type === "cancel") {
+          errorMessage = "Google authentication was cancelled";
+        } else if (result.type === "error") {
+          errorMessage = `Google authentication error: ${
+            result.error?.message || "Unknown error"
+          }`;
+        } else if (result.type === "dismiss") {
+          errorMessage = "Google authentication was dismissed";
+        }
+
+        throw new Error(errorMessage);
       }
     } catch (e) {
       console.error("Google sign in error:", e);

@@ -32,11 +32,11 @@ export const Typography = ({
     underline && { textDecorationLine: "underline" },
     lineHeight && { lineHeight },
     letterSpacing && { letterSpacing },
-    uppercase && { textTransform: "uppercase" },
-    lowercase && { textTransform: "lowercase" },
-    capitalize && { textTransform: "capitalize" },
+    uppercase && { textTransform: "uppercase" as const },
+    lowercase && { textTransform: "lowercase" as const },
+    capitalize && { textTransform: "capitalize" as const },
     style,
-  ];
+  ].filter(Boolean) as any;
 
   return (
     <Text style={textStyles} {...props}>

@@ -37,7 +37,7 @@ config.watchFolders = [__dirname]; // Theo dõi thư mục gốc
 // Cấu hình server
 config.server = {
   ...config.server,
-  port: 8081,
+  port: 3000,
   enhanceMiddleware: (middleware) => {
     return (req, res, next) => {
       // Thêm header cho phép CORS
@@ -48,7 +48,7 @@ config.server = {
 };
 
 // Cấu hình cho Android
-config.server.port = Number(process.env.RCT_METRO_PORT) || 8081; // Sử dụng cổng tùy chỉnh hoặc mặc định 8081
+config.server.port = Number(process.env.RCT_METRO_PORT) || 3000; // Sử dụng cổng tùy chỉnh hoặc mặc định 3000
 
 // Cấu hình Hot Module Replacement và Fast Refresh
 config.resetCache = false; // Tránh reset cache khi không cần thiết

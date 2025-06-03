@@ -23,41 +23,38 @@ export const Home = (props: IHomeProps) => {
   const { data, isLoading } = props;
   const { user } = useAuth();
 
-  // Mock data for courses
+  // Mock data for CS courses
   const courses = [
     {
       id: "1",
-      title: "Tiếng Anh cơ bản",
-      progress: 0.65,
+      title: "Introduction to Chrome Enterprise",
+      progress: 0.8,
       lessons: 20,
-      completedLessons: 13,
+      completedLessons: 16,
       image: "https://via.placeholder.com/100",
     },
     {
       id: "2",
-      title: "Tiếng Anh giao tiếp",
-      progress: 0.3,
+      title: "Derive Insights from BigQuery Data",
+      progress: 0.43,
       lessons: 15,
-      completedLessons: 5,
+      completedLessons: 6,
+      image: "https://via.placeholder.com/100",
+    },
+    {
+      id: "3",
+      title: "Implementing Canary Releases of TensorFlow",
+      progress: 0.58,
+      lessons: 12,
+      completedLessons: 7,
       image: "https://via.placeholder.com/100",
     },
   ];
 
-  // Mock data for upcoming lessons
-  const upcomingLessons = [
-    {
-      id: "1",
-      title: "Ngữ pháp thì hiện tại",
-      time: "10:00 - 11:30",
-      date: "Hôm nay",
-    },
-    {
-      id: "2",
-      title: "Từ vựng chủ đề du lịch",
-      time: "14:00 - 15:30",
-      date: "Ngày mai",
-    },
-  ];
+  // Overall progress calculation
+  const totalCourses = 7;
+  const completedCourses = 2;
+  const overallProgress = (completedCourses / totalCourses) * 100;
 
   if (isLoading) {
     return (
@@ -72,40 +69,51 @@ export const Home = (props: IHomeProps) => {
     <ScrollView style={styles.container}>
       <StatusBar style="auto" />
       <View style={styles.header}>
-        <View>
-          <Text style={styles.greeting}>Xin chào,</Text>
-          <Text style={styles.userName}>{user?.displayName || "Học viên"}</Text>
+        <View style={styles.logoContainer}>
+          <Image
+            source={require("@/assets/images/logo.png")}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.appName}>BKJobmate</Text>
         </View>
-        <Avatar
-          size={50}
-          name={user?.displayName || "User"}
-          source={user?.photoURL ? { uri: user.photoURL } : undefined}
-          borderWidth={2}
-          borderColor={COLORS.white}
-        />
+        <TouchableOpacity>
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color={COLORS.text}
+          />
+        </TouchableOpacity>
       </View>
 
-      <Card style={styles.statsCard}>
-        <View style={styles.statsRow}>
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>65%</Text>
-            <Text style={styles.statLabel}>Hoàn thành</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>18</Text>
-            <Text style={styles.statLabel}>Bài học</Text>
-          </View>
-          <View style={styles.statDivider} />
-          <View style={styles.statItem}>
-            <Text style={styles.statValue}>7</Text>
-            <Text style={styles.statLabel}>Ngày học</Text>
+      {/* Main Illustration */}
+      <View style={styles.illustrationContainer}>
+        <View style={styles.illustrationPlaceholder}>
+          <Ionicons name="school-outline" size={80} color={COLORS.primary} />
+          <Text style={styles.illustrationText}>Học tập thông minh</Text>
+        </View>
+      </View>
+
+      {/* Progress Section */}
+      <View style={styles.progressSection}>
+        <Text style={styles.progressTitle}>TỔNG HOÀN THÀNH KHÓA HỌC</Text>
+        <View style={styles.progressContainer}>
+          <Text style={styles.progressText}>
+            {completedCourses} trên {totalCourses}
+          </Text>
+          <View style={styles.progressCircle}>
+            <Text style={styles.progressPercentage}>
+              {Math.round(overallProgress)}%
+            </Text>
           </View>
         </View>
-      </Card>
+        <TouchableOpacity style={styles.detailButton}>
+          <Text style={styles.detailButtonText}>Xem chi tiết</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Khóa học của tôi</Text>
+        <Text style={styles.sectionTitle}>Các lộ trình của tôi</Text>
         <TouchableOpacity>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
@@ -114,11 +122,10 @@ export const Home = (props: IHomeProps) => {
       {courses.map((course) => (
         <Card key={course.id} style={styles.courseCard}>
           <View style={styles.courseHeader}>
-            <Image source={{ uri: course.image }} style={styles.courseImage} />
             <View style={styles.courseInfo}>
               <Text style={styles.courseTitle}>{course.title}</Text>
               <Text style={styles.courseProgress}>
-                {course.completedLessons}/{course.lessons} bài học
+                Đã hoàn thành {Math.round(course.progress * 100)}%
               </Text>
               <ProgressBar
                 progress={course.progress}
@@ -126,73 +133,16 @@ export const Home = (props: IHomeProps) => {
                 style={styles.courseProgressBar}
               />
             </View>
-          </View>
-          <View style={styles.courseActions}>
-            <TouchableOpacity style={styles.continueButton}>
-              <Text style={styles.continueButtonText}>Tiếp tục học</Text>
+            <TouchableOpacity style={styles.courseArrow}>
+              <Ionicons
+                name="chevron-forward"
+                size={20}
+                color={COLORS.textSecondary}
+              />
             </TouchableOpacity>
           </View>
         </Card>
       ))}
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Bài học sắp tới</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAllText}>Lịch học</Text>
-        </TouchableOpacity>
-      </View>
-
-      {upcomingLessons.map((lesson) => (
-        <Card key={lesson.id} style={styles.lessonCard}>
-          <View style={styles.lessonInfo}>
-            <View style={styles.lessonTimeContainer}>
-              <Ionicons name="time-outline" size={20} color={COLORS.primary} />
-              <Text style={styles.lessonTime}>{lesson.time}</Text>
-            </View>
-            <Text style={styles.lessonDate}>{lesson.date}</Text>
-            <Text style={styles.lessonTitle}>{lesson.title}</Text>
-          </View>
-          <TouchableOpacity style={styles.joinButton}>
-            <Text style={styles.joinButtonText}>Tham gia</Text>
-          </TouchableOpacity>
-        </Card>
-      ))}
-
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Thành tích</Text>
-      </View>
-
-      <Card style={[styles.achievementsCard, styles.lastCard]}>
-        <View style={styles.achievementItem}>
-          <View style={styles.achievementIconContainer}>
-            <Ionicons name="trophy" size={24} color={COLORS.white} />
-          </View>
-          <View style={styles.achievementInfo}>
-            <Text style={styles.achievementTitle}>Học 7 ngày liên tiếp</Text>
-            <ProgressBar
-              progress={0.7}
-              height={6}
-              style={styles.achievementProgress}
-            />
-            <Text style={styles.achievementSubtitle}>5/7 ngày</Text>
-          </View>
-        </View>
-
-        <View style={styles.achievementItem}>
-          <View
-            style={[
-              styles.achievementIconContainer,
-              { backgroundColor: COLORS.success },
-            ]}
-          >
-            <Ionicons name="checkmark-circle" size={24} color={COLORS.white} />
-          </View>
-          <View style={styles.achievementInfo}>
-            <Text style={styles.achievementTitle}>Hoàn thành 10 bài học</Text>
-            <Text style={styles.achievementSubtitle}>Đã hoàn thành!</Text>
-          </View>
-        </View>
-      </Card>
     </ScrollView>
   );
 };
@@ -215,14 +165,91 @@ const styles = StyleSheet.create({
     padding: SPACING.md,
     paddingTop: SPACING.lg,
   },
-  greeting: {
-    fontSize: FONTS.sizes.md,
-    color: COLORS.textSecondary,
+  logoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  userName: {
+  logo: {
+    width: 32,
+    height: 32,
+    marginRight: SPACING.xs,
+  },
+  appName: {
+    fontSize: FONTS.sizes.lg,
+    fontWeight: "600",
+    color: COLORS.text,
+  },
+  illustrationContainer: {
+    alignItems: "center",
+    paddingVertical: SPACING.lg,
+  },
+  illustration: {
+    width: 300,
+    height: 200,
+  },
+  illustrationPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: COLORS.primary + "10",
+    borderRadius: 20,
+    padding: SPACING.xl,
+    width: 300,
+    height: 200,
+  },
+  illustrationText: {
+    fontSize: FONTS.sizes.md,
+    fontWeight: "600",
+    color: COLORS.primary,
+    marginTop: SPACING.sm,
+  },
+  progressSection: {
+    alignItems: "center",
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  progressTitle: {
+    fontSize: FONTS.sizes.sm,
+    fontWeight: "600",
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+    textAlign: "center",
+  },
+  progressContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.md,
+  },
+  progressText: {
     fontSize: FONTS.sizes["2xl"],
     fontWeight: "bold",
     color: COLORS.text,
+    marginRight: SPACING.md,
+  },
+  progressCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.primary + "20",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: COLORS.primary,
+  },
+  progressPercentage: {
+    fontSize: FONTS.sizes.lg,
+    fontWeight: "bold",
+    color: COLORS.primary,
+  },
+  detailButton: {
+    backgroundColor: COLORS.primary + "20",
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
+    borderRadius: 20,
+  },
+  detailButtonText: {
+    color: COLORS.primary,
+    fontSize: FONTS.sizes.sm,
+    fontWeight: "500",
   },
   statsCard: {
     marginHorizontal: SPACING.md,
@@ -272,20 +299,14 @@ const styles = StyleSheet.create({
   },
   courseCard: {
     marginHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
   },
   courseHeader: {
     flexDirection: "row",
-    marginBottom: SPACING.md,
-  },
-  courseImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: SPACING.md,
+    alignItems: "center",
   },
   courseInfo: {
     flex: 1,
-    justifyContent: "center",
   },
   courseTitle: {
     fontSize: FONTS.sizes.md,
@@ -301,97 +322,7 @@ const styles = StyleSheet.create({
   courseProgressBar: {
     marginTop: SPACING.xs,
   },
-  courseActions: {
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    paddingTop: SPACING.sm,
-  },
-  continueButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-    paddingVertical: SPACING.sm,
-    alignItems: "center",
-  },
-  continueButtonText: {
-    color: COLORS.white,
-    fontSize: FONTS.sizes.md,
-    fontWeight: "500",
-  },
-  lessonCard: {
-    marginHorizontal: SPACING.md,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  lessonInfo: {
-    flex: 1,
-  },
-  lessonTimeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.xs,
-  },
-  lessonTime: {
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.primary,
-    fontWeight: "500",
-    marginLeft: SPACING.xs,
-  },
-  lessonDate: {
-    fontSize: FONTS.sizes.xs,
-    color: COLORS.textSecondary,
-    marginBottom: SPACING.xs,
-  },
-  lessonTitle: {
-    fontSize: FONTS.sizes.md,
-    fontWeight: "600",
-    color: COLORS.text,
-  },
-  joinButton: {
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-    paddingHorizontal: SPACING.md,
-    paddingVertical: SPACING.sm,
-  },
-  joinButtonText: {
-    color: COLORS.white,
-    fontSize: FONTS.sizes.sm,
-    fontWeight: "500",
-  },
-  achievementsCard: {
-    marginHorizontal: SPACING.md,
-  },
-  lastCard: {
-    marginBottom: SPACING.xl,
-  },
-  achievementItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.md,
-  },
-  achievementIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: COLORS.primary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: SPACING.md,
-  },
-  achievementInfo: {
-    flex: 1,
-  },
-  achievementTitle: {
-    fontSize: FONTS.sizes.md,
-    fontWeight: "600",
-    color: COLORS.text,
-    marginBottom: SPACING.xs,
-  },
-  achievementSubtitle: {
-    fontSize: FONTS.sizes.sm,
-    color: COLORS.textSecondary,
-  },
-  achievementProgress: {
-    marginBottom: SPACING.xs,
+  courseArrow: {
+    padding: SPACING.xs,
   },
 });

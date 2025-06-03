@@ -1,7 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeContainer } from "@/Screens/Home";
-import { StudyContainer } from "@/Screens/Study";
+import { StudyStackNavigator } from "@/Navigation/Study";
 import { ForumContainer } from "@/Screens/Forum";
 import { ChatContainer } from "@/Screens/Chat";
 import { ProfileContainer } from "@/Screens/Profile";
@@ -51,7 +51,7 @@ export const MainNavigator = () => {
       />
       <Tab.Screen
         name="Study"
-        component={StudyContainer}
+        component={StudyStackNavigator}
         options={{
           title: "Luyện tập",
         }}

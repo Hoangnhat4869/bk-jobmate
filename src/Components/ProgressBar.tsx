@@ -91,11 +91,12 @@ export const ProgressBar = ({
           },
         ]}
       >
+        {" "}
         <Animated.View
           style={[
             styles.progressFill,
             {
-              width: progressWidth,
+              width: progressWidth as any,
               height,
               backgroundColor: progressColor,
               borderRadius,

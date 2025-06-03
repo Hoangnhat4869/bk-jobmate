@@ -10,4 +10,6 @@ export enum RootScreens {
   FORUM = "Forum",
   CHAT = "Chat",
   PROFILE = "Profile",
+  EDIT_PROFILE = "EditProfile",
+  SETTINGS = "Settings",
 }

@@ -115,7 +115,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     color: COLORS.text,
     fontSize: 16,
-    outlineStyle: "none", // Loại bỏ outline trên web
   },
   leftIcon: {
     paddingLeft: 12,

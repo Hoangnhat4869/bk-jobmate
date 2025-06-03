@@ -3,6 +3,7 @@ import { CompositeNavigationProp, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootScreens } from "@/Screens";
 import { RootStackParamList } from "@/Navigation";
+import { StudyStackParamList } from "@/Navigation/Study";
 
 // Define the param list for the main tab navigator
 export type MainTabParamList = {
@@ -21,10 +22,18 @@ export type MainTabNavigationProp = CompositeNavigationProp<
 
 // Define screen-specific navigation props
 export type HomeScreenNavigationProp = MainTabNavigationProp;
-export type StudyScreenNavigationProp = MainTabNavigationProp;
+export type StudyScreenNavigationProp = CompositeNavigationProp<
+  MainTabNavigationProp,
+  NativeStackNavigationProp<StudyStackParamList>
+>;
 export type ForumScreenNavigationProp = MainTabNavigationProp;
 export type ChatScreenNavigationProp = MainTabNavigationProp;
 export type ProfileScreenNavigationProp = MainTabNavigationProp;
+
+// Add missing navigation prop types for standalone screens
+export type ApplicationsScreenNavigationProp = MainTabNavigationProp;
+export type JobsScreenNavigationProp = MainTabNavigationProp;
+export type SettingsScreenNavigationProp = MainTabNavigationProp;
 
 // Define route prop types
 export type HomeScreenRouteProp = RouteProp<MainTabParamList, "Home">;
@@ -57,9 +66,4 @@ export type ChatScreenProps = {
 export type ProfileScreenProps = {
   navigation: ProfileScreenNavigationProp;
   route: ProfileScreenRouteProp;
-};
-
-export type SettingsScreenProps = {
-  navigation: SettingsScreenNavigationProp;
-  route: SettingsScreenRouteProp;
 };

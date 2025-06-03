@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Image } from "react-native";
-import { COLORS } from "@/constants/theme";
+import { COLORS, FONTS, SPACING } from "@/constants/theme";
 
 export const OnboardingPage1 = () => {
   return (
@@ -14,7 +14,7 @@ export const OnboardingPage1 = () => {
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Chào mừng đến với BKJobmate</Text>
         <Text style={styles.description}>
-          If you are not ready, we will make you be
+          Nơi giúp bạn chuẩn bị tốt nhất cho hành trình phỏng vấn xin việc
         </Text>
       </View>
     </View>
@@ -26,35 +26,47 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.background,
   },
   imageContainer: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: "#F5F5F5",
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: COLORS.primaryLight,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 40,
+    marginBottom: SPACING.xl * 2,
+    shadowColor: COLORS.primary,
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 8,
   },
   image: {
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
   },
   contentContainer: {
     alignItems: "center",
+    maxWidth: "90%",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: FONTS.sizes["2xl"],
+    fontWeight: "700" as const,
     color: COLORS.text,
     textAlign: "center",
-    marginBottom: 16,
+    marginBottom: SPACING.md,
+    lineHeight: 32,
   },
   description: {
-    fontSize: 16,
+    fontSize: FONTS.sizes.md,
     color: COLORS.textSecondary,
     textAlign: "center",
-    paddingHorizontal: 20,
+    lineHeight: 24,
+    paddingHorizontal: SPACING.md,
   },
 });

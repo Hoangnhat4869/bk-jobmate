@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   View,
   StyleSheet,
@@ -26,45 +26,68 @@ export const Onboarding = () => {
   const flatListRef = useRef<FlatList>(null);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-  const onboardingPages = [
-    <OnboardingPage1 />,
-    <OnboardingPage2 />,
-    <OnboardingPage3 />,
-    <OnboardingPage4 />,
-    <OnboardingPage5 />,
+  const onboardingData = [
+    { id: "1", component: OnboardingPage1 },
+    { id: "2", component: OnboardingPage2 },
+    { id: "3", component: OnboardingPage3 },
+    { id: "4", component: OnboardingPage4 },
+    { id: "5", component: OnboardingPage5 },
   ];
+  const handleNext = useCallback(() => {
+    console.log(
+      "handleNext called, currentIndex:",
+      currentIndex,
+      "total pages:",
+      onboardingData.length
+    );
+    if (currentIndex < onboardingData.length - 1) {
+      const nextIndex = currentIndex + 1;
+      console.log("Scrolling to index:", nextIndex);
 
-  const handleNext = () => {
-    if (currentIndex < onboardingPages.length - 1) {
-      flatListRef.current?.scrollToIndex({
-        index: currentIndex + 1,
+      // Cập nhật state trước khi scroll
+      setCurrentIndex(nextIndex);
+
+      // Sử dụng scrollToOffset thay vì scrollToIndex
+      flatListRef.current?.scrollToOffset({
+        offset: width * nextIndex,
         animated: true,
       });
     } else {
-      // Navigate to main app when onboarding is complete
+      console.log("Navigating to MAIN");
       navigation.replace(RootScreens.MAIN);
     }
-  };
+  }, [currentIndex, onboardingData.length, navigation]);
 
   const handleSkip = () => {
     navigation.replace(RootScreens.MAIN);
   };
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
 
-  const handleViewableItemsChanged = ({ viewableItems }: any) => {
+  const handleViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
+      console.log("Viewable items changed, new index:", viewableItems[0].index);
       setCurrentIndex(viewableItems[0].index);
     }
-  };
+  }).current;
 
-  const renderItem = ({ item }: { item: JSX.Element }) => {
-    return <View style={styles.pageContainer}>{item}</View>;
+  const renderItem = ({
+    item,
+  }: {
+    item: { id: string; component: React.ComponentType };
+  }) => {
+    const Component = item.component;
+    return (
+      <View style={styles.pageContainer}>
+        <Component />
+      </View>
+    );
   };
-
   const renderDots = () => {
     return (
       <View style={styles.dotsContainer}>
-        {onboardingPages.map((_, index) => (
+        {onboardingData.map((_, index: number) => (
           <View
             key={index}
             style={[
@@ -81,27 +104,31 @@ export const Onboarding = () => {
   };
 
   const getButtonText = () => {
-    return currentIndex === onboardingPages.length - 1
+    return currentIndex === onboardingData.length - 1
       ? "Hoàn thành"
       : "Tiếp theo";
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         ref={flatListRef}
-        data={onboardingPages}
+        data={onboardingData}
         renderItem={renderItem}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onViewableItemsChanged={handleViewableItemsChanged}
-        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        viewabilityConfig={viewabilityConfig}
         initialNumToRender={1}
         maxToRenderPerBatch={1}
         windowSize={3}
+        keyExtractor={(item) => item.id}
+        getItemLayout={(data, index) => ({
+          length: width,
+          offset: width * index,
+          index,
+        })}
       />
-
       <View style={styles.footer}>
         <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
           <Text style={styles.skipText}>Bỏ qua</Text>
