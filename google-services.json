@@ -1,33 +1,41 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "placeholder-project",
-    "storage_bucket": "placeholder-project.appspot.com"
+    "project_number": "916197727859",
+    "project_id": "bk-jobmate-app",
+    "storage_bucket": "bk-jobmate-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000000000",
+        "mobilesdk_app_id": "1:916197727859:android:abcd1234567890ef",
         "android_client_info": {
           "package_name": "com.bkjobmate.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "000000000000-placeholder.apps.googleusercontent.com",
+          "client_id": "916197727859-ubj167nopldeqaf20qg1p6a35ogcc3oi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bkjobmate.app",
+            "certificate_hash": "58e1c571fbac7393fc017aabb096e28d204e62f0"
+          }
+        },
+        {
+          "client_id": "916197727859-ubj167nopldeqaf20qg1p6a35ogcc3oi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "placeholder-api-key"
+          "current_key": "AIzaSyBvOiM98xaVTYjniTuHmMEVQ8YmTJd7QBY"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "000000000000-placeholder.apps.googleusercontent.com",
+              "client_id": "916197727859-ubj167nopldeqaf20qg1p6a35ogcc3oi.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

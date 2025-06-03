@@ -26,7 +26,7 @@ const handleMockAuth = async (
     } else if (url.includes("auth/login") && method === "POST") {
       const { email, password } = body as any;
       mockResult = await mockApiService.login(email, password);
-    } else if (url.includes("auth/register") && method === "POST") {
+    } else if (url.includes("auth/signup") && method === "POST") {
       const { email, password, name } = body as any;
       mockResult = await mockApiService.register(email, password, name);
     } else if (url.includes("auth/logout") && method === "POST") {

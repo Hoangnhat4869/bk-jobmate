@@ -3,6 +3,7 @@ import { StatusBar } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { MainNavigator } from "./Main";
+import { StartContainer } from "@/Screens/Start";
 import { WelcomeContainer } from "@/Screens/Welcome";
 import { OnboardingContainer } from "@/Screens/Onboarding";
 import { LoginContainer } from "@/Screens/Login";
@@ -14,6 +15,7 @@ import { linking } from "./linking";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
+  [RootScreens.START]: undefined;
   [RootScreens.WELCOME]: undefined;
   [RootScreens.ONBOARDING]: undefined;
   [RootScreens.LOGIN]: undefined;
@@ -38,8 +40,12 @@ const ApplicationNavigator = () => {
       <AuthGuard>
         <RootStack.Navigator
           screenOptions={{ headerShown: false }}
-          initialRouteName={RootScreens.WELCOME}
+          initialRouteName={RootScreens.START}
         >
+          <RootStack.Screen
+            name={RootScreens.START}
+            component={StartContainer}
+          />
           <RootStack.Screen
             name={RootScreens.WELCOME}
             component={WelcomeContainer}

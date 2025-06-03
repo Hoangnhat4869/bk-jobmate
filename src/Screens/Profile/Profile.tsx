@@ -22,7 +22,7 @@ export const Profile = () => {
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [refreshKey, setRefreshKey] = useState(0);
   const { userProfile, isLoading, error, fetchUserProfile } = useUser();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth(); // Get user from AuthContext for Google info
 
   // Sử dụng useEffect để hỗ trợ Fast Refresh và fetch dữ liệu
   useEffect(() => {
@@ -34,7 +34,7 @@ export const Profile = () => {
       // Cleanup khi component unmount
       console.log("Profile component will unmount");
     };
-  }, [refreshKey, fetchUserProfile]);
+  }, [refreshKey]); // Removed fetchUserProfile from dependencies
 
   const onLogout = async () => {
     try {
@@ -98,6 +98,9 @@ export const Profile = () => {
     );
   }
 
+  console.log("Profile userProfile:", userProfile);
+  console.log("Auth user:", user);
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.background }}>
       <ScrollView style={styles.container}>
@@ -123,6 +126,9 @@ export const Profile = () => {
               </Typography>
               <Typography variant="body2" color={COLORS.textSecondary}>
                 {userProfile.title}
+              </Typography>
+              <Typography variant="caption" color={COLORS.textSecondary}>
+                {userProfile.email}
               </Typography>
             </View>
           </View>
@@ -172,38 +178,42 @@ export const Profile = () => {
         </Card>
 
         {/* Kinh nghiệm */}
-        <Card style={styles.sectionCard}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Kinh nghiệm
-          </Typography>
-          {userProfile.experiences.map((experience) => (
-            <View key={experience.id} style={styles.experienceItem}>
-              <Typography variant="subtitle1" style={styles.experienceTitle}>
-                {experience.title} - {experience.company}
-              </Typography>
-              <Typography variant="caption" color={COLORS.textSecondary}>
-                {experience.startDate} - {experience.endDate || "Hiện tại"}
-              </Typography>
-              <Typography variant="body2" style={styles.sectionContent}>
-                {experience.description}
-              </Typography>
-            </View>
-          ))}
-        </Card>
-
-        {/* Kỹ năng */}
-        <Card style={styles.sectionCard}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Kỹ năng
-          </Typography>
-          <View style={styles.skillsContainer}>
-            {userProfile.skills.map((skill) => (
-              <View key={skill.id} style={styles.skillBadge}>
-                <Text style={styles.skillText}>{skill.name}</Text>
+        {userProfile.experiences.length > 0 && (
+          <Card style={styles.sectionCard}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Kinh nghiệm
+            </Typography>
+            {userProfile.experiences.map((experience) => (
+              <View key={experience.id} style={styles.experienceItem}>
+                <Typography variant="subtitle1" style={styles.experienceTitle}>
+                  {experience.title} - {experience.company}
+                </Typography>
+                <Typography variant="caption" color={COLORS.textSecondary}>
+                  {experience.startDate} - {experience.endDate || "Hiện tại"}
+                </Typography>
+                <Typography variant="body2" style={styles.sectionContent}>
+                  {experience.description}
+                </Typography>
               </View>
             ))}
-          </View>
-        </Card>
+          </Card>
+        )}
+
+        {/* Kỹ năng */}
+        {userProfile.skills.length > 0 && (
+          <Card style={styles.sectionCard}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Kỹ năng
+            </Typography>
+            <View style={styles.skillsContainer}>
+              {userProfile.skills.map((skill) => (
+                <View key={skill.id} style={styles.skillBadge}>
+                  <Text style={styles.skillText}>{skill.name}</Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+        )}
 
         {/* Nút đăng xuất */}
         <Button

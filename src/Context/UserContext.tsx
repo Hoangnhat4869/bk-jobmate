@@ -4,7 +4,9 @@ import React, {
   useContext,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Định nghĩa kiểu dữ liệu cho thông tin người dùng
 export interface Skill {
@@ -101,6 +103,12 @@ interface UserContextType {
   fetchUserProfile: () => Promise<void>;
   updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
   updateUserSkills: (skills: Skill[]) => Promise<void>;
+  syncGoogleUserData: (googleUser: {
+    id: string;
+    email: string;
+    displayName: string;
+    photoURL?: string;
+  }) => Promise<void>;
 }
 
 // Tạo context
@@ -126,7 +134,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [error, setError] = useState<string | null>(null);
 
   // Giả lập API call để lấy thông tin người dùng
-  const fetchUserProfile = async () => {
+  const fetchUserProfile = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -142,10 +150,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Giả lập API call để cập nhật thông tin người dùng
-  const updateUserProfile = async (data: Partial<UserProfile>) => {
+  const updateUserProfile = useCallback(async (data: Partial<UserProfile>) => {
     setIsLoading(true);
     setError(null);
 
@@ -161,10 +169,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   // Giả lập API call để cập nhật kỹ năng
-  const updateUserSkills = async (skills: Skill[]) => {
+  const updateUserSkills = useCallback(async (skills: Skill[]) => {
     setIsLoading(true);
     setError(null);
 
@@ -180,12 +188,90 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  // Sync Google user data với mock data
+  const syncGoogleUserData = useCallback(
+    async (googleUser: {
+      id: string;
+      email: string;
+      displayName: string;
+      photoURL?: string;
+    }) => {
+      console.log("🔄 UserContext: Syncing Google user data");
+      console.log("📋 Google user input:", googleUser);
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        console.log("📝 Google user displayName:", googleUser.displayName);
+        console.log("📧 Google user email:", googleUser.email);
+        console.log("🖼️ Google user photoURL:", googleUser.photoURL);
+
+        // Tạo user profile từ Google data + mock data
+        const syncedProfile: UserProfile = {
+          ...mockUserProfile, // Giữ mock data cho skills, experiences, etc.
+          id: googleUser.id,
+          name: googleUser.displayName,
+          email: googleUser.email,
+          avatar: googleUser.photoURL || null,
+          title: `${googleUser.displayName} - Google User`,
+          bio: `Xin chào! Tôi là ${googleUser.displayName}. Tôi đã đăng nhập bằng tài khoản Google và đang khám phá ứng dụng BK Jobmate.`,
+        };
+
+        console.log("📝 Final synced profile name:", syncedProfile.name);
+        console.log("📧 Final synced profile email:", syncedProfile.email);
+        console.log("🖼️ Final synced profile avatar:", syncedProfile.avatar);
+
+        console.log("✅ UserContext: Created synced profile:", syncedProfile);
+        setUserProfile(syncedProfile);
+
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        console.log("✅ UserContext: Google user data sync completed");
+      } catch (err) {
+        console.error("❌ UserContext: Failed to sync Google user data:", err);
+        setError("Failed to sync Google user data");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  // Check for Google sync data
+  const checkGoogleSyncData = useCallback(async () => {
+    try {
+      const syncDataStr = await AsyncStorage.getItem("googleSyncData");
+      if (syncDataStr) {
+        console.log("🔍 Found Google sync data in AsyncStorage");
+        const syncData = JSON.parse(syncDataStr);
+        console.log("📋 Google sync data:", syncData);
+
+        // Sync the data
+        await syncGoogleUserData(syncData);
+
+        // Clear the sync data after use
+        await AsyncStorage.removeItem("googleSyncData");
+        console.log("🗑️ Cleared Google sync data from AsyncStorage");
+      } else {
+        console.log("ℹ️ No Google sync data found, using mock data");
+        // Fetch regular mock profile
+        await fetchUserProfile();
+      }
+    } catch (error) {
+      console.error("❌ Error checking Google sync data:", error);
+      // Fallback to regular fetch
+      await fetchUserProfile();
+    }
+  }, [syncGoogleUserData, fetchUserProfile]);
 
   // Tự động fetch thông tin người dùng khi component mount
   useEffect(() => {
-    fetchUserProfile();
-  }, []);
+    checkGoogleSyncData();
+  }, [checkGoogleSyncData]);
 
   const value = {
     userProfile,
@@ -194,6 +280,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     fetchUserProfile,
     updateUserProfile,
     updateUserSkills,
+    syncGoogleUserData,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

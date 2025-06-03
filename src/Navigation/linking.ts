@@ -18,10 +18,11 @@ export const linking: LinkingOptions<RootStackParamList> = {
   ],
   config: {
     screens: {
-      [RootScreens.WELCOME]: {
+      [RootScreens.START]: {
         path: "/",
         exact: true,
       },
+      [RootScreens.WELCOME]: "/welcome",
       [RootScreens.LOGIN]: "/login",
       [RootScreens.REGISTER]: "/register",
       [RootScreens.FORGOT_PASSWORD]: "/forgot-password",
@@ -68,7 +69,8 @@ export const linking: LinkingOptions<RootStackParamList> = {
  */
 export const getScreenPath = (screen: RootScreens): string => {
   const paths: Record<RootScreens, string> = {
-    [RootScreens.WELCOME]: "/",
+    [RootScreens.START]: "/",
+    [RootScreens.WELCOME]: "/welcome",
     [RootScreens.LOGIN]: "/login",
     [RootScreens.REGISTER]: "/register",
     [RootScreens.FORGOT_PASSWORD]: "/forgot-password",

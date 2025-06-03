@@ -1,11 +1,12 @@
+import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { RootScreens } from "..";
+import { RootScreens } from "@/Screens";
 import { Button, Typography, GradientText, AnimatedText } from "@/Components";
 import { COLORS } from "@/constants/theme";
 import { IMAGES } from "@/assets/images";
 
-export const Welcome = (props: {
+export const Start = (props: {
   onNavigate: (string: RootScreens) => void;
 }) => {
   return (
@@ -14,25 +15,18 @@ export const Welcome = (props: {
 
       <View style={styles.headerContainer}>
         <GradientText
+          colors={[COLORS.primary, COLORS.secondary]}
           style={styles.headerTitle}
-          colors={[COLORS.primary, "#8A2BE2"]}
         >
-          BKJobmate
+          BK Jobmate
         </GradientText>
-
-        <Typography
-          variant="h3"
-          style={styles.headerSubtitle}
-          color={COLORS.textSecondary}
-        >
-          Nền tảng hỗ trợ tìm việc
+        <Typography variant="h4" style={styles.headerSubtitle}>
+          Cổng thông tin việc làm
         </Typography>
-
         <AnimatedText
-          text="Kết nối sinh viên với nhà tuyển dụng"
+          text="Khám phá cơ hội nghề nghiệp và phát triển kỹ năng cùng BK Jobmate"
           style={styles.headerDescription}
-          highlightWords={["sinh viên", "nhà tuyển dụng"]}
-          highlightColor={COLORS.primary}
+          delay={500}
         />
       </View>
 
@@ -47,10 +41,16 @@ export const Welcome = (props: {
           title="Đăng nhập"
         />
         <Button
-          onPress={() => props.onNavigate(RootScreens.MAIN)}
+          onPress={() => props.onNavigate(RootScreens.REGISTER)}
           style={[styles.button, styles.secondaryButton]}
-          title="Khám phá ngay"
+          title="Đăng ký"
           variant="outline"
+        />
+        <Button
+          onPress={() => props.onNavigate(RootScreens.MAIN)}
+          style={[styles.button, styles.guestButton]}
+          title="Khám phá với tư cách khách"
+          variant="text"
         />
       </View>
     </View>
@@ -104,6 +104,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   secondaryButton: {
-    backgroundColor: "transparent",
+    borderColor: COLORS.primary,
+  },
+  guestButton: {
+    marginTop: 10,
   },
 });

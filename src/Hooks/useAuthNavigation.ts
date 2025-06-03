@@ -32,6 +32,15 @@ export const useAuthNavigation = () => {
     );
   }, [navigation]);
 
+  const navigateToStart = useCallback(() => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: RootScreens.START }],
+      })
+    );
+  }, [navigation]);
+
   const navigateToWelcome = useCallback(() => {
     navigation.dispatch(
       CommonActions.reset({
@@ -44,11 +53,11 @@ export const useAuthNavigation = () => {
   const handleLogout = useCallback(async () => {
     try {
       await signOut();
-      navigateToWelcome();
+      navigateToStart(); // Navigate to START instead of WELCOME
     } catch (error) {
       console.error("Logout error:", error);
     }
-  }, [signOut, navigateToWelcome]);
+  }, [signOut, navigateToStart]);
 
   const handleClearError = useCallback(() => {
     clearError();
@@ -59,6 +68,7 @@ export const useAuthNavigation = () => {
     navigateToRegister,
     navigateToOnboarding,
     navigateToMain,
+    navigateToStart,
     navigateToWelcome,
     handleLogout,
     handleClearError,
