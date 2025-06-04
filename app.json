@@ -2,7 +2,7 @@
   "expo": {
     "name": "BK Jobmate",
     "slug": "bk-jobmate",
-    "version": "1.1.0",
+    "version": "1.2.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -29,6 +29,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "package": "com.bkjobmate.app",
+      "versionCode": 4,
       "googleServicesFile": "./google-services.json",
       "intentFilters": [
         {

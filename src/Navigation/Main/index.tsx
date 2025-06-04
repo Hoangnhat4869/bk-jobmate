@@ -7,7 +7,6 @@ import { ChatContainer } from "@/Screens/Chat";
 import { ProfileContainer } from "@/Screens/Profile";
 import { MainTabParamList } from "@/Types/navigation";
 import { Home, Study, Forum, Chat, User } from "@/assets/svgs";
-import { COLORS } from "@/constants/theme";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -16,7 +15,7 @@ export const MainNavigator = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
+        tabBarIcon: ({ color, size }) => {
           // Sử dụng các biểu tượng SVG thay vì Ionicons
           if (route.name === "Home") {
             return <Home width={size} height={size} color={color} />;

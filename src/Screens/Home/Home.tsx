@@ -8,10 +8,9 @@ import {
   Image,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { Card, ProgressBar, Avatar } from "@/Components";
+import { Card, ProgressBar } from "@/Components";
 import { COLORS, FONTS, SPACING } from "@/constants/theme";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "@/Context/AuthContext";
 import { User } from "@/Services";
 
 export interface IHomeProps {
@@ -19,10 +18,7 @@ export interface IHomeProps {
   isLoading: boolean;
 }
 
-export const Home = (props: IHomeProps) => {
-  const { data, isLoading } = props;
-  const { user } = useAuth();
-
+export const Home = () => {
   // Mock data for CS courses
   const courses = [
     {
@@ -56,14 +52,7 @@ export const Home = (props: IHomeProps) => {
   const completedCourses = 2;
   const overallProgress = (completedCourses / totalCourses) * 100;
 
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <StatusBar style="auto" />
-        <Text>Đang tải...</Text>
-      </View>
-    );
-  }
+  // Loading state removed for simplicity
 
   return (
     <ScrollView style={styles.container}>
@@ -71,7 +60,7 @@ export const Home = (props: IHomeProps) => {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Image
-            source={require("@/assets/images/logo.png")}
+            source={require("../../assets/images/logo.png")}
             style={styles.logo}
             resizeMode="contain"
           />
